@@ -8,6 +8,9 @@
  * - Subtraction (-)
  * - Multiplication (*)
  * - Division (/)
+ * - Modulo (%)
+ * - Power (^)
+ * - Square Root (sqrt)
  */
 
 const readline = require('readline');
@@ -25,10 +28,47 @@ let operation = null;
 let shouldResetDisplay = false;
 
 /**
+ * Returns the remainder of a divided by b
+ * @param {number} a - Dividend
+ * @param {number} b - Divisor
+ * @returns {number} The remainder of a divided by b
+ * @throws {Error} If b is zero
+ */
+function modulo(a, b) {
+  if (b === 0) {
+    throw new Error('Cannot perform modulo by zero');
+  }
+  return a % b;
+}
+
+/**
+ * Returns base raised to the exponent
+ * @param {number} base - The base number
+ * @param {number} exponent - The exponent
+ * @returns {number} base raised to the exponent
+ */
+function power(base, exponent) {
+  return Math.pow(base, exponent);
+}
+
+/**
+ * Returns the square root of n
+ * @param {number} n - The number to find the square root of
+ * @returns {number} The square root of n
+ * @throws {Error} If n is negative
+ */
+function squareRoot(n) {
+  if (n < 0) {
+    throw new Error('Cannot calculate square root of a negative number');
+  }
+  return Math.sqrt(n);
+}
+
+/**
  * Perform arithmetic operation
  * @param {number} prev - Previous value
  * @param {number} current - Current value
- * @param {string} op - Operation (+, -, *, /)
+ * @param {string} op - Operation (+, -, *, /, %, ^, sqrt)
  * @returns {number|null} Result of the operation, or null if division by zero
  */
 function calculate(prev, current, op) {
@@ -44,6 +84,22 @@ function calculate(prev, current, op) {
         return null;
       }
       return prev / current;
+    case '%':
+      try {
+        return modulo(prev, current);
+      } catch (error) {
+        console.error(error.message);
+        return null;
+      }
+    case '^':
+      return power(prev, current);
+    case 'sqrt':
+      try {
+        return squareRoot(current);
+      } catch (error) {
+        console.error(error.message);
+        return null;
+      }
     default:
       return current;
   }
@@ -63,6 +119,9 @@ function showCalculator() {
   console.log('  [-] Subtraction');
   console.log('  [*] Multiplication');
   console.log('  [/] Division');
+  console.log('  [%] Modulo');
+  console.log('  [^] Power');
+  console.log('  [sqrt] Square Root');
   console.log('  [c] Clear');
   console.log('  [q] Quit\n');
 
@@ -84,12 +143,20 @@ function showCalculator() {
       return;
     }
 
-    if (trimmed === '+' || trimmed === '-' || trimmed === '*' || trimmed === '/') {
+    if (trimmed === '+' || trimmed === '-' || trimmed === '*' || trimmed === '/' || trimmed === '%' || trimmed === '^') {
       if (operation && !shouldResetDisplay) {
         currentValue = calculate(previousValue, currentValue, operation);
       }
       previousValue = currentValue;
       operation = trimmed;
+      shouldResetDisplay = true;
+      showCalculator();
+      return;
+    }
+
+    if (trimmed === 'sqrt') {
+      currentValue = calculate(previousValue, currentValue, 'sqrt');
+      operation = null;
       shouldResetDisplay = true;
       showCalculator();
       return;
@@ -128,4 +195,4 @@ if (require.main === module) {
 }
 
 // Export for testing
-module.exports = { calculate };
+module.exports = { calculate, modulo, power, squareRoot };
